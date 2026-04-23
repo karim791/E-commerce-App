@@ -1,5 +1,6 @@
 import 'package:e_commerce_app/models/add_to_cart.dart';
 import 'package:e_commerce_app/models/product_item_model.dart';
+import 'package:e_commerce_app/services/product_details_services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'product_state.dart';
@@ -10,13 +11,16 @@ class ProductCubit extends Cubit<ProductState> {
   int quantity = 1;
   bool? onTap;
 
-  void getProductById(String id) {
-    emit(ProductLoading());
+  final productDetail = ProductDetailsServicesImpl();
 
-    Future.delayed(const Duration(seconds: 1), () {
-      final product = dummyProducts.firstWhere((product) => product.id == id);
-      emit(ProductLoaded(product: product));
-    });
+  void getProductById(String id) async {
+    emit(ProductLoading());
+    try {
+      final selectedProduct = await productDetail.fetchProductDetails(id);
+      emit(ProductLoaded(product: selectedProduct));
+    } catch (e) {
+      emit(ProductError(e.toString()));
+    }
   }
 
   void incrementCounter(String id) {
@@ -36,21 +40,34 @@ class ProductCubit extends Cubit<ProductState> {
     emit(SizeSelected(size: size));
   }
 
-  void addToCart(String productId) {
+  void addToCart(String productId) async {
     emit(AddToCartLoading());
-
-    final cartItem = AddToCart(
-      id: DateTime.now().toIso8601String(),
-      product: dummyProducts.firstWhere((item) => item.id == productId),
-      size: selectedSize!,
-      quantity: quantity,
-      totalPrice:
-          dummyProducts.firstWhere((item) => item.id == productId).price * quantity,
-    );
-    dummyCart.add(cartItem);
-
-    Future.delayed(const Duration(seconds: 1), () {
+    try {
+      final selectedProduct = await productDetail.fetchProductDetails(
+        productId,
+      );
+      final cartItem = AddToCartModel(
+        id: DateTime.now().toIso8601String(),
+        product: selectedProduct,
+        size: selectedSize!,
+        quantity: quantity,
+      );
+      await productDetail.addToCart(cartItem);
       emit(AddToCartLoaded(productId: productId));
-    });
+    } catch (e) {
+      emit(AddToCartError(e.toString()));
+    }
+
+    // final cartItem = AddToCartModel(
+    //   id: DateTime.now().toIso8601String(),
+    //   product: dummyProducts.firstWhere((item) => item.id == productId),
+    //   size: selectedSize!,
+    //   quantity: quantity,
+    // );
+    // dummyCart.add(cartItem);
+
+    // Future.delayed(const Duration(seconds: 1), () {
+    //   emit(AddToCartLoaded(productId: productId));
+    // });
   }
 }

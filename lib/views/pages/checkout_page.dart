@@ -131,7 +131,7 @@ class CheckoutPage extends StatelessWidget {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          cartItem.product.itemName,
+                                          cartItem.product.name,
                                           style: textTheme.bodyLarge!.copyWith(
                                             fontWeight: FontWeight.bold,
                                           ),

@@ -1,7 +1,9 @@
 import 'package:e_commerce_app/utilities/app_routes.dart';
+import 'package:e_commerce_app/view_models/auth_cubit/auth_cubit.dart';
 import 'package:e_commerce_app/views/widget/other_login_methods.dart';
 import 'package:e_commerce_app/views/widget/text_form_with_title.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CreateAccountPage extends StatefulWidget {
   const CreateAccountPage({super.key});
@@ -20,7 +22,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final textTheme = Theme.of(context).textTheme;
-
+    final authCubit = BlocProvider.of<AuthCubit>(context);
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -82,26 +84,55 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 SizedBox(
                   width: double.infinity,
                   height: MediaQuery.of(context).size.height * 0.06,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
+                  child: BlocConsumer<AuthCubit, AuthState>(
+                    bloc: authCubit,
+                    listenWhen: (previous, current) =>
+                        current is AuthDone || current is AuthError,
+                    listener: (context, state) {
+                      if (state is AuthDone) {
                         Navigator.of(context).pushNamed(AppRoutes.homePage);
-                      } else {
+                      } else if (state is AuthError) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Enter Valid Email,Password')),
+                          const SnackBar(content: Text('Failed Register!!')),
                         );
                       }
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                    ),
-                    child: Text(
-                      'Create Account',
-                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                    buildWhen: (previous, current) =>
+                        current is AuthLoading ||
+                        current is AuthDone ||
+                        current is AuthError,
+                    builder: (context, state) {
+                      if (state is AuthLoading) {
+                        return ElevatedButton(
+                          onPressed: null,
+                          child: CircularProgressIndicator.adaptive(),
+                        );
+                      } else if (state is AuthError) {
+                        return Center(child: Text(state.message));
+                      }
+                      return ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            authCubit.registerWithEmailAndPassword(
+                              _emailController.text,
+                              _passwordController.text,
+                              _usernameController.text,
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                        ),
+                        child: Text(
+                          'Create Account',
+                          style: Theme.of(context).textTheme.bodyLarge!
+                              .copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 SizedBox(height: size.height * 0.01),
@@ -123,11 +154,36 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                         ),
                       ),
                       SizedBox(height: size.height * 0.02),
-                      OtherLoginMethods(
-                        onTap: () {},
-                        imgUrl:
-                            'https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png',
-                        title: 'Sign in with Google',
+                     BlocConsumer<AuthCubit, AuthState>(
+                        bloc: authCubit,
+                        listenWhen: (previous, current) =>
+                            current is GoogleSigned ||
+                            current is GoogleSignFailure,
+                        listener: (context, state) {
+                          if (state is GoogleSigned) {
+                            Navigator.of(context).pushNamed(AppRoutes.homePage);
+                          } else if (state is GoogleSignFailure) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Failed Login!!')),
+                            );
+                          }
+                        },
+                        
+                        builder: (context, state) {
+                          if (state is GoogleSigning) {
+                            return Center(
+                              child: CircularProgressIndicator.adaptive(),
+                            );
+                          }
+                          return OtherLoginMethods(
+                            onTap: () async{
+                             await authCubit.authenticationWithGoogle();
+                            },
+                            imgUrl:
+                                'https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png',
+                            title: 'Sign in with Google',
+                          );
+                        },
                       ),
                       SizedBox(height: size.height * 0.01),
 

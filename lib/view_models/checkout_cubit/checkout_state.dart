@@ -7,7 +7,7 @@ final class CheckoutInitial extends CheckoutState {}
 final class CheckoutLoading extends CheckoutState {}
 
 final class CheckoutLoaded extends CheckoutState {
-  final List<AddToCart> cartItem;
+  final List<AddToCartModel> cartItem;
   final double subtotal;
   final int amount;
   final PaymentCardModel? paymentCard;

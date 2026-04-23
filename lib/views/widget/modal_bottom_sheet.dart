@@ -100,10 +100,16 @@ class ModalBottomSheetMethod extends StatelessWidget {
             ),
             InkWell(
               onTap: () {
-                final checkoutCubit= context.read<CheckoutCubit>();
-                Navigator.of(context)
-                    .pushNamed(AppRoutes.paymentPage)
-                    .then((value) =>checkoutCubit.getCheckout());
+                final checkoutCubit = context.read<CheckoutCubit>();
+                final paymentCubit = BlocProvider.of<PaymentMethodCubit>(
+                  context,
+                );
+                Navigator.of(context).pushNamed(AppRoutes.paymentPage).then((
+                  value,
+                ) {
+                  checkoutCubit.getCheckout();
+                  paymentCubit.fetchPaymentMethod();
+                });
               },
               child: SizedBox(
                 height: size.height * 0.07,
@@ -140,8 +146,8 @@ class ModalBottomSheetMethod extends StatelessWidget {
                 bloc: paymentMethodCubit,
                 listenWhen: (previous, current) => current is ConfirmCardMethod,
                 listener: (context, state) {
-                  if (state is ConfirmCardMethod) { 
-                  Navigator.of(context).pop(true);
+                  if (state is ConfirmCardMethod) {
+                    Navigator.of(context).pop(true);
                   }
                 },
                 child: ElevatedButton(

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CartCastom extends StatelessWidget {
-  final AddToCart cartItem;
+  final AddToCartModel cartItem;
 
   const CartCastom({super.key, required this.cartItem});
 
@@ -38,7 +38,7 @@ class CartCastom extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      cartItem.product.itemName,
+                      cartItem.product.name,
                       style: textTheme.bodyLarge!.copyWith(
                         fontWeight: FontWeight.bold,
                       ),

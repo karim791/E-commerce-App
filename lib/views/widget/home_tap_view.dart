@@ -97,7 +97,7 @@ class HomeTapView extends StatelessWidget {
                                 onTap: () {
                                   Navigator.of(context).pushNamed(
                                     AppRoutes.productDetailsPage,
-                                    arguments: state.dummyProducts[index].id,
+                                    arguments: state.products[index].id,
                                   );
                                 },
                                 child: Container(
@@ -108,7 +108,7 @@ class HomeTapView extends StatelessWidget {
                                   child: Center(
                                     child: CachedNetworkImage(
                                       imageUrl:
-                                          state.dummyProducts[index].imgUrl,
+                                          state.products[index].imgUrl,
                                       progressIndicatorBuilder:
                                           (
                                             context,
@@ -139,7 +139,7 @@ class HomeTapView extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          state.dummyProducts[index].itemName,
+                          state.products[index].name,
                           style: textStyle.labelLarge!.copyWith(
                             fontWeight: FontWeight.w600,
                             fontSize: 17,
@@ -147,7 +147,7 @@ class HomeTapView extends StatelessWidget {
                         ),
 
                         Text(
-                          state.dummyProducts[index].category,
+                          state.products[index].category,
                           style: textStyle.labelMedium!.copyWith(
                             fontWeight: FontWeight.w400,
                             color: Colors.grey,
@@ -155,7 +155,7 @@ class HomeTapView extends StatelessWidget {
                         ),
 
                         Text(
-                          "\$${state.dummyProducts[index].price}",
+                          "\$${state.products[index].price}",
                           style: textStyle.labelLarge!.copyWith(
                             fontWeight: FontWeight.w500,
                           ),
@@ -163,7 +163,7 @@ class HomeTapView extends StatelessWidget {
                       ],
                     );
                   },
-                  itemCount: state.dummyProducts.length,
+                  itemCount: state.products.length,
                 ),
               ],
             ),

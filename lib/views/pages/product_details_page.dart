@@ -81,7 +81,7 @@ class ProductDetailsPage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                state.product.itemName,
+                                state.product.name,
                                 style: Theme.of(context)
                                     .textTheme
                                     .headlineSmall!
@@ -109,7 +109,7 @@ class ProductDetailsPage extends StatelessWidget {
                                       ),
                                       productId: state.product.id,
                                       counterValue: 1,
-                                      onTap:null ,
+                                      onTap: null,
                                     );
                                   } else {
                                     return const SizedBox.shrink();
@@ -232,7 +232,7 @@ class ProductDetailsPage extends StatelessWidget {
                                     current is AddToCartLoaded,
                                 builder: (context, state) {
                                   if (state is AddToCartLoading) {
-                                   return ElevatedButton(
+                                    return ElevatedButton(
                                       onPressed: null,
 
                                       child:
@@ -260,10 +260,10 @@ class ProductDetailsPage extends StatelessWidget {
                                             ),
                                           ),
                                         );
-                                      }else{
-                                      BlocProvider.of<ProductCubit>(
-                                        context,
-                                      ).addToCart(product.id);
+                                      } else {
+                                        BlocProvider.of<ProductCubit>(
+                                          context,
+                                        ).addToCart(product.id);
                                       }
                                     },
                                     icon: Icon(
