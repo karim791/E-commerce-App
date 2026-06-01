@@ -64,7 +64,7 @@ class ProductItemsModel {
       'name': name,
       'imgUrl': imgUrl,
       'price': price,
-      'isFav': isFav,
+    
       'category': category,
       'description': description,
       'averageRate': averageRate,
@@ -80,7 +80,7 @@ class ProductItemsModel {
       name: map['name'] as String,
       imgUrl: map['imgUrl'] as String,
       price: map['price'] as double,
-      isFav: map['isFav'] as bool,
+     
       category: map['category'] as String,
       description: map['description'] as String,
       averageRate: map['averageRate'] as double,

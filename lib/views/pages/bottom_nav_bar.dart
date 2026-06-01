@@ -24,9 +24,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   final List<Widget> buildScreens = [
     BlocProvider(
-      create: (context) {
+      create: (context)  {
         final cubit = HomeCubit();
         cubit.getHomeData();
+        cubit.getCategories();
         return cubit;
       },
       child: HomePage(),

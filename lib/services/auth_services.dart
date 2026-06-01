@@ -60,7 +60,7 @@ class AuthServicesImpl implements AuthServices {
     try {
       await _googleAuth.initialize();
       final GoogleSignInAccount gUser = await _googleAuth.authenticate();
-      final gAuth = gUser.authentication;
+      final gAuth =  gUser.authentication;
       if (gAuth.idToken == null) return false;
       final credential = GoogleAuthProvider.credential(
         idToken: gAuth.idToken,

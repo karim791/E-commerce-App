@@ -1,3 +1,4 @@
+
 class CategoriesModel {
   final String id;
   final String name;
@@ -10,7 +11,26 @@ class CategoriesModel {
     required this.imgUrl,
     required this.productCount,
   });
-}
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'id': id,
+      'name': name,
+      'imgUrl': imgUrl,
+      'productCount': productCount,
+    };
+  }
+
+  factory CategoriesModel.fromMap(Map<String, dynamic> map) {
+    return CategoriesModel(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      imgUrl: map['imgUrl'] as String,
+      productCount: map['productCount'] as int,
+    );
+  }
+
+ }
 
 List<CategoriesModel> dummyCategories = [
   CategoriesModel(

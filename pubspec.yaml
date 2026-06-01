@@ -31,7 +31,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/571467967_2221330675054332_5857262115784261188_n.jpg
-    - assets/images/categories/
   #   - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
 flutter_native_splash:

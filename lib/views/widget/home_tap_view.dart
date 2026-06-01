@@ -26,7 +26,7 @@ class HomeTapView extends StatelessWidget {
                 SizedBox(
                   height: size.height * 0.21,
                   child: FlutterCarousel.builder(
-                    itemCount: state.dummyHomeCarouselItems.length,
+                    itemCount: state.homeCarouselItems.length,
                     itemBuilder:
                         (
                           BuildContext context,
@@ -38,7 +38,7 @@ class HomeTapView extends StatelessWidget {
                             clipBehavior: Clip.hardEdge,
                             child: CachedNetworkImage(
                               imageUrl: state
-                                  .dummyHomeCarouselItems[itemIndex]
+                                  .homeCarouselItems[itemIndex]
                                   .imgUrl,
                               progressIndicatorBuilder:
                                   (context, url, downloadProgress) => Center(
