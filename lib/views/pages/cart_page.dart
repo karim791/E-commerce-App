@@ -1,4 +1,4 @@
-import 'package:e_commerce_app/models/add_to_cart.dart';
+
 import 'package:e_commerce_app/utilities/app_routes.dart';
 import 'package:e_commerce_app/view_models/cart_cubit/cart_cubit.dart';
 import 'package:e_commerce_app/views/widget/cart_castom.dart';
@@ -19,7 +19,7 @@ class CartPage extends StatelessWidget {
             current is CartError ||
             current is CartLoading,
         builder: (context, state) {
-          if (dummyCart.isEmpty) {
+          if (state is CartLoaded && state.cartItem.isEmpty) {
             return Center(child: Text('Your Cart is Empty'));
           }
           if (state is CartLoading) {

@@ -1,6 +1,7 @@
 import 'package:e_commerce_app/models/categories_model.dart';
 import 'package:e_commerce_app/models/home_carousel_item.dart';
 import 'package:e_commerce_app/models/product_item_model.dart';
+import 'package:e_commerce_app/services/auth_services.dart';
 import 'package:e_commerce_app/services/firestore_services.dart';
 import 'package:e_commerce_app/utilities/api_paths.dart';
 
@@ -9,10 +10,12 @@ abstract class HomeServices {
   Future<List<HomeCarouselItemModel>> fetchFeaturedProducts();
   Future<List<CategoriesModel>> fetchCategories();
   
+  
 }
 
 class HomeServicesImpl implements HomeServices {
   final firestoreServices = FirestoreServices.instance;
+  final authServices = AuthServicesImpl();
 
   @override
   Future<List<ProductItemsModel>> fetchProducts() async {
@@ -40,6 +43,6 @@ class HomeServicesImpl implements HomeServices {
     );
     return result;
   }
-
+  
+  }
  
-}

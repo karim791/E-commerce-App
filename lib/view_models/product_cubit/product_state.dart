@@ -14,8 +14,9 @@ final class CounterLoaded extends ProductState {
 
 final class ProductLoaded extends ProductState {
   final ProductItemsModel product;
+  final bool isFavorite;
 
-  ProductLoaded({required this.product});
+  ProductLoaded({required this.product, required this.isFavorite});
 }
 
 final class SizeSelected extends ProductState {
@@ -40,4 +41,21 @@ final class ProductError extends ProductState {
   final String message;
 
   ProductError(this.message);
+}
+
+final class SetFavoriteLoading extends ProductState {
+  final String productId;
+  SetFavoriteLoading({required this.productId});
+}
+
+final class SetFavoriteSuccess extends ProductState {
+  final String productId;
+  final bool isFavorite;
+  SetFavoriteSuccess({required this.isFavorite, required this.productId});
+}
+
+final class SetFavoriteError extends ProductState {
+  final String productId;
+  final String message;
+  SetFavoriteError({required this.message, required this.productId});
 }

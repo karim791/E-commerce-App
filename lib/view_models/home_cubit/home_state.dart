@@ -17,14 +17,33 @@ final class HomeError extends HomeState {
   HomeError({required this.errorMessage});
 }
 
-final class CategoriesLoading extends HomeState {
-}
+final class CategoriesLoading extends HomeState {}
 
 final class CategoriesLoaded extends HomeState {
   final List<CategoriesModel> categories;
   CategoriesLoaded({required this.categories});
 }
+
 final class CategoriesFailed extends HomeState {
   final String errorMessage;
   CategoriesFailed({required this.errorMessage});
+}
+
+// States for setting favorite status
+
+final class SetFavoriteLoading extends HomeState {
+  final String productId;
+  SetFavoriteLoading({required this.productId});
+}
+
+final class SetFavoriteSuccess extends HomeState {
+  final String productId;
+  final bool isFavorite;
+  SetFavoriteSuccess({required this.isFavorite,required this.productId});
+}
+
+final class SetFavoriteError extends HomeState {
+  final String productId;
+  final String errorMessage;
+  SetFavoriteError(this.errorMessage,{required this.productId});
 }

@@ -1,4 +1,5 @@
 import 'package:e_commerce_app/models/add_to_cart.dart';
+import 'package:e_commerce_app/services/cart_services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'cart_state.dart';
@@ -8,13 +9,21 @@ class CartCubit extends Cubit<CartState> {
 
   bool? onTap;
   int quantity=1;
+  final cartServices = CartServicesImpl();
 
-  void getCartData() {
+  Future<void> getCartData() async {
     emit(CartLoading());
 
-    Future.delayed(Duration(seconds: 1), () {
-      emit(CartLoaded(cartItem: dummyCart, subtotal: _subtotal));
-    });
+    try {
+      final cartItem = await cartServices.fetchCartItem();
+      emit(CartLoaded(cartItem: cartItem, subtotal: _subtotal));
+    } catch (e) {
+      emit(CartError(errorMessage: e.toString()));
+    }
+
+    // Future.delayed(Duration(seconds: 1), () {
+    //   emit(CartLoaded(cartItem: dummyCart, subtotal: _subtotal));
+    // });
   }
 
   void incrementCounter(String id, [int? initialQuantity]) {

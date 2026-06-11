@@ -10,10 +10,15 @@ class HomeTapView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final homeCubit = BlocProvider.of<HomeCubit>(context);
     final textStyle = Theme.of(context).textTheme;
     final size = MediaQuery.of(context).size;
     return BlocBuilder<HomeCubit, HomeState>(
-      bloc: BlocProvider.of<HomeCubit>(context),
+      bloc: homeCubit,
+      buildWhen: (previous, current) =>
+          current is HomeLoading ||
+          current is HomeLoaded ||
+          current is HomeError,
       builder: (context, state) {
         if (state is HomeLoading) {
           return const Center(child: CircularProgressIndicator());
@@ -37,9 +42,8 @@ class HomeTapView extends StatelessWidget {
                           child: Card(
                             clipBehavior: Clip.hardEdge,
                             child: CachedNetworkImage(
-                              imageUrl: state
-                                  .homeCarouselItems[itemIndex]
-                                  .imgUrl,
+                              imageUrl:
+                                  state.homeCarouselItems[itemIndex].imgUrl,
                               progressIndicatorBuilder:
                                   (context, url, downloadProgress) => Center(
                                     child: CircularProgressIndicator.adaptive(
@@ -88,6 +92,7 @@ class HomeTapView extends StatelessWidget {
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
+                    final product = state.products[index];
                     return Column(
                       children: [
                         Expanded(
@@ -97,8 +102,8 @@ class HomeTapView extends StatelessWidget {
                                 onTap: () {
                                   Navigator.of(context).pushNamed(
                                     AppRoutes.productDetailsPage,
-                                    arguments: state.products[index].id,
-                                  );
+                                    arguments: product.id,
+                                  ).then((value) => homeCubit.getHomeData(),);
                                 },
                                 child: Container(
                                   decoration: BoxDecoration(
@@ -107,8 +112,7 @@ class HomeTapView extends StatelessWidget {
                                   ),
                                   child: Center(
                                     child: CachedNetworkImage(
-                                      imageUrl:
-                                          state.products[index].imgUrl,
+                                      imageUrl: product.imgUrl,
                                       progressIndicatorBuilder:
                                           (
                                             context,
@@ -128,18 +132,78 @@ class HomeTapView extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              Align(
-                                alignment: AlignmentGeometry.topRight,
-                                child: IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(Icons.favorite_border),
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white54,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(2.0),
+                                    child: BlocBuilder<HomeCubit, HomeState>(
+                                      bloc: homeCubit,
+                                      buildWhen: (previous, current) =>
+                                          (current is SetFavoriteLoading &&
+                                              current.productId ==
+                                                  product.id) ||
+                                          (current is SetFavoriteSuccess &&
+                                              current.productId ==
+                                                  product.id) ||
+                                          (current is SetFavoriteError &&
+                                              current.productId == product.id),
+                                      builder: (context, state) {
+                                        if (state is SetFavoriteLoading) {
+                                          return CircularProgressIndicator.adaptive();
+                                        } else if (state
+                                            is SetFavoriteSuccess) {
+                                          return state.isFavorite
+                                              ? InkWell(
+                                                  onTap: () async {
+                                                    await homeCubit.setFavorite(
+                                                      product,
+                                                    );
+                                                  },
+                                                  child: const Icon(
+                                                    Icons.favorite,
+                                                    color: Colors.red,
+                                                  ),
+                                                )
+                                              : InkWell(
+                                                  onTap: () async {
+                                                    await homeCubit.setFavorite(
+                                                      product,
+                                                    );
+                                                  },
+                                                  child: const Icon(
+                                                    Icons.favorite_border,
+                                                  ),
+                                                );
+                                        }
+                                        return InkWell(
+                                          onTap: () async {
+                                            await homeCubit.setFavorite(
+                                              product,
+                                            );
+                                          },
+                                          child: product.isFav? Icon(
+                                            Icons.favorite,
+                                            color: Colors.red,
+                                          ): Icon(
+                                            Icons.favorite_border,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
                         Text(
-                          state.products[index].name,
+                          product.name,
                           style: textStyle.labelLarge!.copyWith(
                             fontWeight: FontWeight.w600,
                             fontSize: 17,
@@ -147,7 +211,7 @@ class HomeTapView extends StatelessWidget {
                         ),
 
                         Text(
-                          state.products[index].category,
+                          product.category,
                           style: textStyle.labelMedium!.copyWith(
                             fontWeight: FontWeight.w400,
                             color: Colors.grey,
@@ -155,7 +219,7 @@ class HomeTapView extends StatelessWidget {
                         ),
 
                         Text(
-                          "\$${state.products[index].price}",
+                          "\$${product.price}",
                           style: textStyle.labelLarge!.copyWith(
                             fontWeight: FontWeight.w500,
                           ),

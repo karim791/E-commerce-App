@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:e_commerce_app/models/product_item_model.dart';
+import 'package:e_commerce_app/utilities/app_colors.dart';
 import 'package:e_commerce_app/view_models/product_cubit/product_cubit.dart';
 import 'package:e_commerce_app/views/widget/counter_widget.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ class ProductDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final productCubit = BlocProvider.of<ProductCubit>(context);
     return BlocBuilder<ProductCubit, ProductState>(
       bloc: BlocProvider.of<ProductCubit>(context),
       buildWhen: (previous, current) =>
@@ -26,6 +28,7 @@ class ProductDetailsPage extends StatelessWidget {
           );
         } else if (state is ProductLoaded) {
           final product = state.product;
+          final bool stateFav=state.isFavorite;
           return Scaffold(
             extendBodyBehindAppBar: true,
             appBar: AppBar(
@@ -34,9 +37,56 @@ class ProductDetailsPage extends StatelessWidget {
               centerTitle: true,
               elevation: 0,
               actions: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.favorite_border),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white54,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: BlocBuilder<ProductCubit, ProductState>(
+                        bloc: productCubit,
+                        buildWhen: (previous, current) =>
+                            current is SetFavoriteLoading ||
+                            current is SetFavoriteSuccess ||
+                            current is SetFavoriteError,
+                        builder: (context, state) {
+                          if (state is SetFavoriteLoading) {
+                            return CircularProgressIndicator.adaptive();
+                          } else if (state is SetFavoriteSuccess) {
+                            return state.isFavorite
+                                ? InkWell(
+                                    onTap: () async =>
+                                        await productCubit.setFavorite(product),
+                                    child: Icon(
+                                      Icons.favorite,
+                                      color: AppColors.red,
+                                    ),
+                                  )
+                                : InkWell(
+                                    onTap: () async =>
+                                        await productCubit.setFavorite(product),
+                                    child: Icon(Icons.favorite_border),
+                                  );
+                          } else if (state is SetFavoriteError) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(state.message)),
+                            );
+                          }
+                          return InkWell(
+                            onTap: () async {
+                              await productCubit.setFavorite(product);
+                            },
+                            child: stateFav
+                                ? Icon(Icons.favorite, color: AppColors.red)
+                                : Icon(Icons.favorite_border),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -63,7 +113,7 @@ class ProductDetailsPage extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 470.0),
+                  padding: const EdgeInsets.only(top: 430.0),
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(

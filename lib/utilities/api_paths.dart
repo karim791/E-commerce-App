@@ -6,5 +6,8 @@ class ApiPaths {
   static String announcement() => 'announcement/';
   static String cartItem(String userId, String productId) =>
       'users/$userId/cart/$productId';
-  static String cartItems() => 'users/cart/';
+  static String cartItems(String userId) => 'users/$userId/cart/';
+  static String favoriteItems(String userId) => 'users/$userId/favorites/';
+  static String favoriteItem(String userId, String productId) =>
+      'users/$userId/favorites/$productId';
 }
