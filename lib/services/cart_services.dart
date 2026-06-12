@@ -5,6 +5,8 @@ import 'package:e_commerce_app/utilities/api_paths.dart';
 
 abstract class CartServices {
   Future<List<AddToCartModel>> fetchCartItem();
+  Future<void> addToCart(AddToCartModel cartItem);
+  Future<void> removeFromCart(AddToCartModel cartItem);
 }
 
 class CartServicesImpl implements CartServices {
@@ -19,5 +21,20 @@ class CartServicesImpl implements CartServices {
       builder: (data, documentId) => AddToCartModel.fromMap(data, documentId),
     );
     return result;
+  }
+  
+  @override
+  Future<void> addToCart(AddToCartModel cartItem) async {
+    await firestoreServices.setDate(
+      path: ApiPaths.cartItem(authServices.user()!.uid, cartItem.id), // Replace 'current_user_id' with the actual user ID and use cartItem.id for the document ID
+      data: cartItem.toMap(),
+    );
+  }
+  
+  @override
+  Future<void> removeFromCart(AddToCartModel cartItem) async {
+    await firestoreServices.deleteData(
+      path: ApiPaths.cartItem(authServices.user()!.uid, cartItem.id), // Replace 'current_user_id' with the actual user ID and use cartItem.id for the document ID
+    );
   }
 }

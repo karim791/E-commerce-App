@@ -19,6 +19,20 @@ final class CartError extends CartState {
   CartError({required this.errorMessage});
 }
 
+final class SubtotalUpdated extends CartState {
+  final double subtotal;
+
+  SubtotalUpdated({required this.subtotal});
+}
+
+
+// Counter states
+
+final class CounterLoading extends CartState {
+  final String productId;
+
+  CounterLoading({required this.productId});
+}
 final class CounterLoaded extends CartState {
   final bool onTap;
   final int value;
@@ -31,8 +45,26 @@ final class CounterLoaded extends CartState {
   });
 }
 
-final class SubtotalUpdated extends CartState {
-  final double subtotal;
+final class CounterError extends CartState {
+  final String errorMessage;
 
-  SubtotalUpdated({required this.subtotal});
+  CounterError( this.errorMessage);
+}
+
+// Remove from cart states
+final class RemoveFromCartLoading extends CartState {
+  final String productId;
+
+  RemoveFromCartLoading({required this.productId});
+}
+final class RemoveFromCartLoaded extends CartState {
+  final String productId;
+
+  RemoveFromCartLoaded({required this.productId});
+}
+final class RemoveFromCartError extends CartState {
+  final String errorMessage;
+  final String productId;
+
+  RemoveFromCartError( this.errorMessage, {required this.productId});
 }

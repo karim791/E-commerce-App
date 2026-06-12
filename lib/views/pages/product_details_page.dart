@@ -2,13 +2,65 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:e_commerce_app/models/product_item_model.dart';
 import 'package:e_commerce_app/utilities/app_colors.dart';
 import 'package:e_commerce_app/view_models/product_cubit/product_cubit.dart';
-import 'package:e_commerce_app/views/widget/counter_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ProductDetailsPage extends StatelessWidget {
   final String productId;
   const ProductDetailsPage({super.key, required this.productId});
+
+  Widget _counterWidget({
+    required BuildContext context,
+    required String productId,
+    required int counterValue,
+    bool? onTap,
+    required dynamic cubit,
+  }) {
+    final size = MediaQuery.of(context).size;
+    return Container(
+      height: size.height * 0.045,
+      width: size.width * 0.24,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          CircleAvatar(
+            radius: 17,
+            backgroundColor: onTap != null && onTap == false
+                ? Colors.black54
+                : Colors.white,
+            child: IconButton(
+              icon: onTap != null && onTap == false
+                  ? Icon(Icons.remove, size: 16, color: Colors.white)
+                  : Icon(Icons.remove, size: 16),
+              onPressed: () async => await cubit.decrementCounter(productId),
+            ),
+          ),
+          Text(
+            counterValue.toString(),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
+          ),
+          CircleAvatar(
+            radius: 17,
+            backgroundColor: onTap != null && onTap == true
+                ? Colors.black54
+                : Colors.white,
+            child: IconButton(
+              icon: onTap != null && onTap == true
+                  ? Icon(Icons.add, size: 16, color: Colors.white)
+                  : Icon(Icons.add, size: 16),
+              onPressed: () async => await cubit.incrementCounter(productId),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +80,7 @@ class ProductDetailsPage extends StatelessWidget {
           );
         } else if (state is ProductLoaded) {
           final product = state.product;
-          final bool stateFav=state.isFavorite;
+          final bool stateFav = state.isFavorite;
           return Scaffold(
             extendBodyBehindAppBar: true,
             appBar: AppBar(
@@ -138,27 +190,25 @@ class ProductDetailsPage extends StatelessWidget {
                                     .copyWith(fontWeight: FontWeight.bold),
                               ),
                               BlocBuilder<ProductCubit, ProductState>(
-                                bloc: BlocProvider.of<ProductCubit>(context),
+                                bloc: productCubit,
                                 buildWhen: (previous, current) =>
                                     current is CounterLoaded ||
                                     current is ProductLoaded,
                                 builder: (context, state) {
                                   if (state is CounterLoaded) {
-                                    return CounterWidget(
-                                      cubit: BlocProvider.of<ProductCubit>(
-                                        context,
-                                      ),
+                                    return _counterWidget(
+                                      context: context,
                                       productId: productId,
                                       counterValue: state.value,
+                                      cubit: productCubit,
                                       onTap: state.onTap,
                                     );
                                   } else if (state is ProductLoaded) {
-                                    return CounterWidget(
-                                      cubit: BlocProvider.of<ProductCubit>(
-                                        context,
-                                      ),
+                                    return _counterWidget(
+                                      context: context,
                                       productId: state.product.id,
                                       counterValue: 1,
+                                      cubit: productCubit,
                                       onTap: null,
                                     );
                                   } else {
@@ -192,7 +242,7 @@ class ProductDetailsPage extends StatelessWidget {
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           BlocBuilder<ProductCubit, ProductState>(
-                            bloc: BlocProvider.of<ProductCubit>(context),
+                            bloc: productCubit,
                             buildWhen: (previous, current) =>
                                 current is SizeSelected ||
                                 current is ProductLoaded,
@@ -201,9 +251,7 @@ class ProductDetailsPage extends StatelessWidget {
                                 children: ProductSize.values.map((size) {
                                   return InkWell(
                                     onTap: () {
-                                      BlocProvider.of<ProductCubit>(
-                                        context,
-                                      ).selectSize(size);
+                                     productCubit.selectSize(size);
                                     },
                                     child: Container(
                                       margin: const EdgeInsets.only(right: 8.0),
@@ -276,7 +324,7 @@ class ProductDetailsPage extends StatelessWidget {
                               ),
 
                               BlocBuilder<ProductCubit, ProductState>(
-                                bloc: BlocProvider.of<ProductCubit>(context),
+                                bloc: productCubit,
                                 buildWhen: (previous, current) =>
                                     current is AddToCartLoading ||
                                     current is AddToCartLoaded,
@@ -286,7 +334,7 @@ class ProductDetailsPage extends StatelessWidget {
                                       onPressed: null,
 
                                       child:
-                                          const CircularProgressIndicator.adaptive(),
+                                          const CircularProgressIndicator.adaptive(strokeWidth: 2),
                                     );
                                   } else if (state is AddToCartLoaded) {
                                     return ElevatedButton(
@@ -297,9 +345,7 @@ class ProductDetailsPage extends StatelessWidget {
                                   }
                                   return ElevatedButton.icon(
                                     onPressed: () {
-                                      if (BlocProvider.of<ProductCubit>(
-                                            context,
-                                          ).selectedSize ==
+                                      if (productCubit.selectedSize ==
                                           null) {
                                         ScaffoldMessenger.of(
                                           context,
@@ -311,9 +357,7 @@ class ProductDetailsPage extends StatelessWidget {
                                           ),
                                         );
                                       } else {
-                                        BlocProvider.of<ProductCubit>(
-                                          context,
-                                        ).addToCart(product.id);
+                                        productCubit.addToCart(product.id);
                                       }
                                     },
                                     icon: Icon(

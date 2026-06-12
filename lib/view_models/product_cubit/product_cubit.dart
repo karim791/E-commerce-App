@@ -78,16 +78,6 @@ class ProductCubit extends Cubit<ProductState> {
       emit(AddToCartError(e.toString()));
     }
 
-    // final cartItem = AddToCartModel(
-    //   id: DateTime.now().toIso8601String(),
-    //   product: dummyProducts.firstWhere((item) => item.id == productId),
-    //   size: selectedSize!,
-    //   quantity: quantity,
-    // );
-    // dummyCart.add(cartItem);
-
-    // Future.delayed(const Duration(seconds: 1), () {
-    //   emit(AddToCartLoaded(productId: productId));
-    // });
+   
   }
 }

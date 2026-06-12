@@ -21,7 +21,7 @@ class HomeTapView extends StatelessWidget {
           current is HomeError,
       builder: (context, state) {
         if (state is HomeLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator(strokeWidth: 2,));
         } else if (state is HomeLoaded) {
           return SingleChildScrollView(
             child: Column(
@@ -48,6 +48,7 @@ class HomeTapView extends StatelessWidget {
                                   (context, url, downloadProgress) => Center(
                                     child: CircularProgressIndicator.adaptive(
                                       value: downloadProgress.progress,
+                                      strokeWidth: 2,
                                     ),
                                   ),
                               errorWidget: (context, url, error) =>
@@ -123,6 +124,7 @@ class HomeTapView extends StatelessWidget {
                                                 CircularProgressIndicator.adaptive(
                                                   value:
                                                       downloadProgress.progress,
+                                                      strokeWidth: 2,
                                                 ),
                                           ),
                                       errorWidget: (context, url, error) =>
@@ -155,7 +157,7 @@ class HomeTapView extends StatelessWidget {
                                               current.productId == product.id),
                                       builder: (context, state) {
                                         if (state is SetFavoriteLoading) {
-                                          return CircularProgressIndicator.adaptive();
+                                          return CircularProgressIndicator.adaptive(strokeWidth: 2,);
                                         } else if (state
                                             is SetFavoriteSuccess) {
                                           return state.isFavorite

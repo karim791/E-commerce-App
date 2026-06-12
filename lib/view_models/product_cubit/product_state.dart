@@ -6,11 +6,6 @@ final class ProductInitial extends ProductState {}
 
 final class ProductLoading extends ProductState {}
 
-final class CounterLoaded extends ProductState {
-  final bool onTap;
-  final int value;
-  CounterLoaded({required this.value, required this.onTap});
-}
 
 final class ProductLoaded extends ProductState {
   final ProductItemsModel product;
@@ -43,6 +38,15 @@ final class ProductError extends ProductState {
   ProductError(this.message);
 }
 
+// Counter State Class
+final class CounterLoaded extends ProductState {
+  final bool onTap;
+  final int value;
+  CounterLoaded({required this.value, required this.onTap});
+}
+
+
+// Favorite State Classes
 final class SetFavoriteLoading extends ProductState {
   final String productId;
   SetFavoriteLoading({required this.productId});

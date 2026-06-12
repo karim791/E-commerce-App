@@ -11,9 +11,10 @@ class CartPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+     final cartCubit = BlocProvider.of<CartCubit>(context);
     return Scaffold(
       body: BlocBuilder<CartCubit, CartState>(
-        bloc: BlocProvider.of<CartCubit>(context),
+        bloc: cartCubit,
         buildWhen: (previous, current) =>
             current is CartLoaded ||
             current is CartError ||
@@ -41,7 +42,7 @@ class CartPage extends StatelessWidget {
                     child: Column(
                       children: [
                         BlocBuilder<CartCubit, CartState>(
-                          bloc: BlocProvider.of<CartCubit>(context),
+                          bloc: cartCubit,
                           buildWhen: (previous, current) =>
                               current is SubtotalUpdated,
                           builder: (context, subtotalState) {
@@ -63,7 +64,7 @@ class CartPage extends StatelessWidget {
                                         MediaQuery.of(context).size.height *
                                         0.01,
                                   ),
-                                  totalPriceWidget(context, 'Discount', 10.0),
+                                  totalPriceWidget(context, 'Shipping', 10.0),
                                   SizedBox(
                                     height:
                                         MediaQuery.of(context).size.height *
@@ -85,7 +86,7 @@ class CartPage extends StatelessWidget {
                                   totalPriceWidget(
                                     context,
                                     'Total Price',
-                                    subtotalState.subtotal - 10,
+                                    subtotalState.subtotal + 10,
                                   ),
                                   SizedBox(
                                     height:
@@ -111,7 +112,7 @@ class CartPage extends StatelessWidget {
                                   height:
                                       MediaQuery.of(context).size.height * 0.01,
                                 ),
-                                totalPriceWidget(context, 'Discount', 10.0),
+                                totalPriceWidget(context, 'Shipping', 10.0),
                                 SizedBox(
                                   height:
                                       MediaQuery.of(context).size.height * 0.01,
@@ -130,7 +131,7 @@ class CartPage extends StatelessWidget {
                                 totalPriceWidget(
                                   context,
                                   'Total Price',
-                                  state.subtotal - 10,
+                                  state.subtotal + 10,
                                 ),
                                 SizedBox(
                                   height:
