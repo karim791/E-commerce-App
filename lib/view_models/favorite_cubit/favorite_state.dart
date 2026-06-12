@@ -11,7 +11,8 @@ final class FavoriteLoading extends FavoriteState {}
 
 final class FavoriteLoaded extends FavoriteState {
   final List<ProductItemsModel> favoriteProducts;
-  FavoriteLoaded(this.favoriteProducts);
+  final bool isEmpty;
+  FavoriteLoaded(this.favoriteProducts, this.isEmpty);
 }
 
 

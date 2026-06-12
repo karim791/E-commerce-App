@@ -1,4 +1,5 @@
 import 'package:e_commerce_app/view_models/cart_cubit/cart_cubit.dart';
+import 'package:e_commerce_app/view_models/favorite_cubit/favorite_cubit.dart';
 import 'package:e_commerce_app/view_models/home_cubit/home_cubit.dart';
 import 'package:e_commerce_app/views/pages/favorite_page.dart';
 import 'package:e_commerce_app/views/pages/home_page.dart';
@@ -24,7 +25,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   final List<Widget> buildScreens = [
     BlocProvider(
-      create: (context)  {
+      create: (context) {
         final cubit = HomeCubit();
         cubit.getHomeData();
         cubit.getCategories();
@@ -40,7 +41,14 @@ class _BottomNavBarState extends State<BottomNavBar> {
       },
       child: CartPage(),
     ),
-    FavoritePage(),
+    BlocProvider(
+      create: (context) {
+        final cubit = FavoriteCubit();
+        cubit.getFavoriteProducts();
+        return cubit;
+      },
+      child: FavoritePage(),
+    ),
     ProfilePage(),
   ];
 

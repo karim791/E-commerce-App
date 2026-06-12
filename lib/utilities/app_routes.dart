@@ -1,5 +1,5 @@
 class AppRoutes {
-  static const String homePage = '/home';
+  static const String homePage = '/';
   static const String productDetailsPage = '/productDetails';
   static const String checkoutPage = '/checkoutPage';
   static const String cartPage = '/cart';
