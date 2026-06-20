@@ -17,7 +17,7 @@ class ProductDetailsServicesImpl implements ProductDetailsServices {
   Future<ProductItemsModel> fetchProductDetails(String id) async {
     final result = await firestore.getDocument<ProductItemsModel>(
       path: ApiPaths.product(id),
-      buider: (data, documentId) => ProductItemsModel.fromMap(data),
+      builder: (data, documentId) => ProductItemsModel.fromMap(data),
     );
     return result;
   }

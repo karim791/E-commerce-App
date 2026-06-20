@@ -18,6 +18,8 @@ final class FetchingLocationFailure extends AddressState {
   FetchingLocationFailure(this.errorMessage);
 }
 
+//Add Location states
+
 final class AddingLocation extends AddressState {}
 
 final class AddedLocation extends AddressState {}
@@ -28,16 +30,28 @@ final class AddingLocationFailure extends AddressState {
   AddingLocationFailure(this.errorMessage);
 }
 
+// chose Location states
+
+final class ChosingLocation extends AddressState {}
+
 final class ChosenLocation extends AddressState {
-  final AddressItemModel location;
+  final AddressItemModel? location;
 
   ChosenLocation(this.location);
 }
 
+final class ChosingLocationError extends AddressState {
+  final String message;
+  ChosingLocationError(this.message);
+}
+
+//confirm states
+
 final class ConfirmLocationLoading extends AddressState {}
 
 final class ConfirmLocationLoaded extends AddressState {
-
+  final AddressItemModel chosenLocation;
+  ConfirmLocationLoaded(this.chosenLocation);
 }
 
 final class ConfirmLocationFailure extends AddressState {

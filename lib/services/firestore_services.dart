@@ -20,22 +20,22 @@ class FirestoreServices {
 
   Future<T> getDocument<T>({
     required String path,
-    required T Function(Map<String, dynamic> data, String documentId) buider,
+    required T Function(Map<String, dynamic> data, String documentId) builder,
   }) async {
     final reference = firestore.doc(path);
     final snapshot = await reference.get();
-    return buider(snapshot.data() as Map<String, dynamic>, snapshot.id);
+    return builder(snapshot.data() as Map<String, dynamic>, snapshot.id);
   }
 
   Future<List<T>> getCollection<T>({
     required String path,
     required T Function(Map<String, dynamic> data, String collectionId) builder,
-    Query Function(Query query)? queryBuider,
+    Query Function(Query query)? queryBuilder,
     int Function(T lhs, T rhs)? sort,
   }) async {
     Query query = firestore.collection(path);
-    if (queryBuider != null) {
-      query = queryBuider(query);
+    if (queryBuilder != null) {
+      query = queryBuilder(query);
     }
     final snapshots = await query.get();
     final result = snapshots.docs

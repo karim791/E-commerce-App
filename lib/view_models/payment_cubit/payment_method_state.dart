@@ -34,14 +34,15 @@ final class ChosenCardMethod extends PaymentMethodState {
   ChosenCardMethod(this.choosenCard);
 }
 
+final class ConfirmingCardMethod extends PaymentMethodState {}
+
 final class ConfirmCardMethod extends PaymentMethodState {
   final PaymentCardModel choosenCard;
 
   ConfirmCardMethod(this.choosenCard);
 }
 
-final class PaymentMethodCardSelected extends PaymentMethodState {
-  final String selectedId;
-
-  PaymentMethodCardSelected(this.selectedId);
+final class ConfirmingCardMethodError extends PaymentMethodState {
+  final String message;
+  ConfirmingCardMethodError(this.message);
 }

@@ -8,7 +8,7 @@ class AddressPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = BlocProvider.of<AddressCubit>(context);
+    final addressCubit = BlocProvider.of<AddressCubit>(context);
     final locationController = TextEditingController();
     return Scaffold(
       appBar: AppBar(title: Text('Address Page'), centerTitle: true),
@@ -27,7 +27,7 @@ class AddressPage extends StatelessWidget {
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.01),
                 Text(
-                  'Let\'s find an unforgettable event. Choose a location below to get started: ',
+                  'Let\'s find an unforgettable event. Choose a location below to get started : ',
                   style: Theme.of(
                     context,
                   ).textTheme.titleMedium!.copyWith(color: Colors.grey),
@@ -42,7 +42,7 @@ class AddressPage extends StatelessWidget {
                     ),
                     hintText: 'Write location: city-country',
                     suffixIcon: BlocConsumer<AddressCubit, AddressState>(
-                      bloc: cubit,
+                      bloc: addressCubit,
                       listenWhen: (previous, current) =>
                           current is AddedLocation ||
                           current is ConfirmLocationLoaded,
@@ -67,9 +67,11 @@ class AddressPage extends StatelessWidget {
                           );
                         }
                         return IconButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (locationController.text.isNotEmpty) {
-                              cubit.addingLocation(locationController.text);
+                              await addressCubit.addingLocation(
+                                locationController.text,
+                              );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text('Enter Valid Location')),
@@ -96,7 +98,7 @@ class AddressPage extends StatelessWidget {
                   ).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
                 ),
                 BlocBuilder<AddressCubit, AddressState>(
-                  bloc: cubit,
+                  bloc: addressCubit,
                   buildWhen: (previous, current) =>
                       current is FetchingLocation ||
                       current is FetchedLocation ||
@@ -107,149 +109,172 @@ class AddressPage extends StatelessWidget {
                         child: CircularProgressIndicator.adaptive(),
                       );
                     } else if (state is FetchedLocation) {
-                      final dummyLocations = state.locations;
-                      return ListView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: dummyLocations.length,
-                        itemBuilder: (context, index) {
-                          final location = dummyLocations[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: BlocBuilder<AddressCubit, AddressState>(
-                              bloc: cubit,
-                              buildWhen: (previous, current) =>
-                                  current is ChosenLocation,
-                              builder: (context, state) {
-                                if (state is ChosenLocation) {
-                                  final chosenlocation = state.location;
-                                  return InkWell(
-                                    onTap: () {
-                                      cubit.chooseLocation(location.id);
-                                    },
-                                    child: DecoratedBox(
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color:
-                                              chosenlocation.id == location.id
-                                              ? Theme.of(context).primaryColor
-                                              : Colors.grey.shade300,
-                                        ),
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  location.city,
-                                                  style: Theme.of(
-                                                    context,
-                                                  ).textTheme.titleMedium,
-                                                ),
-                                                Text(
-                                                  '${location.city},${location.country}',
-                                                  style: TextStyle(
-                                                    color: Colors.grey,
-                                                  ),
-                                                ),
-                                              ],
+                      final locations = state.locations;
+                      return locations.isEmpty
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text('Location List is Empty'),
+                              ),
+                            )
+                          : ListView.builder(
+                              physics: NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: locations.length,
+                              itemBuilder: (context, index) {
+                                final location = locations[index];
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: BlocBuilder<AddressCubit, AddressState>(
+                                    bloc: addressCubit,
+                                    buildWhen: (previous, current) =>
+                                        current is ChosenLocation,
+                                    builder: (context, state) {
+                                      if (state is ChosenLocation) {
+                                        final chosenlocation = state.location;
+                                        return InkWell(
+                                          onTap: () {
+                                            addressCubit.changingLocation(
+                                              location.id,
+                                            );
+                                          },
+                                          child: DecoratedBox(
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color:
+                                                    chosenlocation!.id ==
+                                                        location.id
+                                                    ? Theme.of(
+                                                        context,
+                                                      ).primaryColor
+                                                    : Colors.grey.shade300,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
                                             ),
-                                            Stack(
-                                              alignment: Alignment.center,
-                                              children: [
-                                                CircleAvatar(
-                                                  radius: 55,
-                                                  backgroundColor:
-                                                      chosenlocation.id ==
-                                                          location.id
-                                                      ? Theme.of(
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(
+                                                8.0,
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        location.city,
+                                                        style: Theme.of(
                                                           context,
-                                                        ).primaryColor
-                                                      : Colors.grey,
-                                                ),
-                                                CircleAvatar(
-                                                  radius: 50,
-                                                  foregroundImage:
-                                                      CachedNetworkImageProvider(
-                                                        location.image,
+                                                        ).textTheme.titleMedium,
                                                       ),
+                                                      Text(
+                                                        '${location.city},${location.country}',
+                                                        style: TextStyle(
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Stack(
+                                                    alignment: Alignment.center,
+                                                    children: [
+                                                      CircleAvatar(
+                                                        radius: 55,
+                                                        backgroundColor:
+                                                            chosenlocation.id ==
+                                                                location.id
+                                                            ? Theme.of(
+                                                                context,
+                                                              ).primaryColor
+                                                            : Colors.grey,
+                                                      ),
+                                                      CircleAvatar(
+                                                        radius: 50,
+                                                        foregroundImage:
+                                                            CachedNetworkImageProvider(
+                                                              location.image,
+                                                            ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                      return InkWell(
+                                        onTap: () {
+                                          addressCubit.changingLocation(
+                                            location.id,
+                                          );
+                                        },
+                                        child: DecoratedBox(
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: Colors.grey.shade300,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      location.city,
+                                                      style: Theme.of(
+                                                        context,
+                                                      ).textTheme.titleMedium,
+                                                    ),
+                                                    Text(
+                                                      '${location.city},${location.country}',
+                                                      style: TextStyle(
+                                                        color: Colors.grey,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Stack(
+                                                  alignment: Alignment.center,
+                                                  children: [
+                                                    CircleAvatar(
+                                                      radius: 55,
+                                                      backgroundColor:
+                                                          Colors.grey,
+                                                    ),
+                                                    CircleAvatar(
+                                                      radius: 50,
+                                                      foregroundImage:
+                                                          CachedNetworkImageProvider(
+                                                            location.image,
+                                                          ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ],
                                             ),
-                                          ],
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  );
-                                }
-                                return InkWell(
-                                  onTap: () {
-                                    cubit.chooseLocation(location.id);
-                                  },
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.grey.shade300,
-                                      ),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                location.city,
-                                                style: Theme.of(
-                                                  context,
-                                                ).textTheme.titleMedium,
-                                              ),
-                                              Text(
-                                                '${location.city},${location.country}',
-                                                style: TextStyle(
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Stack(
-                                            alignment: Alignment.center,
-                                            children: [
-                                              CircleAvatar(
-                                                radius: 55,
-                                                backgroundColor: Colors.grey,
-                                              ),
-                                              CircleAvatar(
-                                                radius: 50,
-                                                foregroundImage:
-                                                    CachedNetworkImageProvider(
-                                                      location.image,
-                                                    ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                      );
+                                    },
                                   ),
                                 );
                               },
-                            ),
-                          );
-                        },
-                      );
+                            );
                     } else if (state is FetchingLocationFailure) {
                       return Center(child: Text(state.errorMessage));
                     } else {
@@ -262,7 +287,7 @@ class AddressPage extends StatelessWidget {
                   width: double.infinity,
                   height: MediaQuery.of(context).size.height * 0.06,
                   child: BlocBuilder<AddressCubit, AddressState>(
-                    bloc: cubit,
+                    bloc: addressCubit,
                     buildWhen: (previous, current) =>
                         current is ConfirmLocationLoading ||
                         current is ConfirmLocationLoaded ||
@@ -275,8 +300,8 @@ class AddressPage extends StatelessWidget {
                         );
                       }
                       return ElevatedButton(
-                        onPressed: () {
-                          cubit.confirmLocation();
+                        onPressed: ()  {
+                           addressCubit.confirmLocation();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,

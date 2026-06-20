@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:e_commerce_app/utilities/app_routes.dart';
-import 'package:e_commerce_app/view_models/checkout_cubit/checkout_cubit.dart';
+import 'package:e_commerce_app/view_models/address_cubit/address_cubit.dart';
 import 'package:e_commerce_app/view_models/payment_cubit/payment_method_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,18 +36,21 @@ class ModalBottomSheetMethod extends StatelessWidget {
                 } else if (state is FetchingPaymentMethodFailure) {
                   return Center(child: Text(state.message));
                 } else if (state is FetchedPaymentMethod) {
+                  final paymentCards = state.paymentCards;
+
                   return ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
-                    itemCount: state.paymentCards.length,
+                    itemCount: paymentCards.length,
                     itemBuilder: (context, index) {
-                      final paymentCard = state.paymentCards[index];
                       return Card(
                         elevation: 0,
                         color: Colors.white,
                         child: ListTile(
                           onTap: () {
-                            paymentMethodCubit.chosenCardMethod(paymentCard.id);
+                            paymentMethodCubit.changePaymentMethod(
+                              paymentCards[index].id,
+                            );
                           },
                           leading: DecoratedBox(
                             decoration: BoxDecoration(
@@ -58,36 +61,40 @@ class ModalBottomSheetMethod extends StatelessWidget {
                               padding: const EdgeInsets.all(4),
                               child: CachedNetworkImage(
                                 imageUrl:
-                                    'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/1200px-MasterCard_Logo.svg.png',
+                                    'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/MasterCard_early_1990s_logo.svg/1280px-MasterCard_early_1990s_logo.svg.png',
+
                                 width: size.width * 0.1,
                                 height: size.height * 0.1,
                                 fit: BoxFit.contain,
                               ),
                             ),
                           ),
-                          title: Text(paymentCard.holderName),
-                          subtitle: Text(paymentCard.cardNumber),
+                          title: Text(paymentCards[index].holderName),
+                          subtitle: Text(paymentCards[index].cardNumber),
                           trailing:
                               BlocBuilder<
                                 PaymentMethodCubit,
                                 PaymentMethodState
                               >(
                                 bloc: paymentMethodCubit,
-
+                                buildWhen: (previous, current) =>
+                                    current is ChosenCardMethod,
                                 builder: (context, state) {
-                                  String? selectedId;
-                                  if (state is PaymentMethodCardSelected) {
-                                    selectedId = state.selectedId;
+                                  if (state is ChosenCardMethod) {
+                                    final chosenPaymentCard = state.choosenCard;
+                                    return Radio<String>(
+                                      value: paymentCards[index].id,
+                                      groupValue: chosenPaymentCard.id,
+                                      onChanged: (id) {
+                                        if (id != null) {
+                                          paymentMethodCubit
+                                              .changePaymentMethod(id);
+                                        }
+                                      },
+                                    );
+                                  } else {
+                                    return const SizedBox.shrink();
                                   }
-                                  return Radio<String>(
-                                    value: paymentCard.id,
-                                    groupValue: selectedId,
-                                    onChanged: (id) {
-                                      if (id != null) {
-                                        paymentMethodCubit.chosenCardMethod(id);
-                                      }
-                                    },
-                                  );
                                 },
                               ),
                         ),
@@ -100,16 +107,15 @@ class ModalBottomSheetMethod extends StatelessWidget {
             ),
             InkWell(
               onTap: () {
-                final checkoutCubit = context.read<CheckoutCubit>();
-                final paymentCubit = BlocProvider.of<PaymentMethodCubit>(
-                  context,
-                );
-                Navigator.of(context).pushNamed(AppRoutes.paymentPage).then((
-                  value,
-                ) {
-                  checkoutCubit.getCheckout();
-                  paymentCubit.fetchPaymentMethod();
-                });
+                Navigator.of(context)
+                    .pushNamed(
+                      AppRoutes.paymentPage,
+                      arguments: paymentMethodCubit,
+                    )
+                    .then(
+                      (value) async =>
+                          await paymentMethodCubit.fetchPaymentMethod(),
+                    );
               },
               child: SizedBox(
                 height: size.height * 0.07,
@@ -142,29 +148,42 @@ class ModalBottomSheetMethod extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               height: size.height * 0.06,
-              child: BlocListener<PaymentMethodCubit, PaymentMethodState>(
+              child: BlocConsumer<PaymentMethodCubit, PaymentMethodState>(
                 bloc: paymentMethodCubit,
                 listenWhen: (previous, current) => current is ConfirmCardMethod,
+                buildWhen: (previous, current) =>
+                    current is ConfirmingCardMethod ||
+                    current is ConfirmCardMethod ||
+                    current is ConfirmingCardMethodError,
                 listener: (context, state) {
                   if (state is ConfirmCardMethod) {
                     Navigator.of(context).pop(true);
                   }
                 },
-                child: ElevatedButton(
-                  onPressed: () {
-                    paymentMethodCubit.confirmCard();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                  ),
-                  child: Text(
-                    'Confirm Payment Card',
-                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
+                builder: (context, state) {
+                  if (state is ConfirmingCardMethod) {
+                    return ElevatedButton(
+                      onPressed: null,
+                      child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+                    );
+                  }
+
+                  return ElevatedButton(
+                    onPressed: () {
+                      paymentMethodCubit.confirmCard();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
                     ),
-                  ),
-                ),
+                    child: Text(
+                      'Confirm Payment Card',
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],

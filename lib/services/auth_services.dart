@@ -11,7 +11,15 @@ abstract class AuthServices {
 
 class AuthServicesImpl implements AuthServices {
   final _firebaseAuth = FirebaseAuth.instance;
-  final _googleAuth = GoogleSignIn.instance;
+  static final _googleAuth = GoogleSignIn.instance;
+  static bool _googleSignInInitialized = false;
+
+  Future<void> _ensureGoogleSignInInitialized() async {
+    if (!_googleSignInInitialized) {
+      await _googleAuth.initialize();
+      _googleSignInInitialized = true;
+    }
+  }
 
   @override
   Future<bool> loginWithEmailAndPassword(String email, String password) async {
@@ -56,33 +64,16 @@ class AuthServicesImpl implements AuthServices {
   }
 
   @override
-  Future<bool> loginWithGoogle() async {
-    try {
-      await _googleAuth.initialize();
-      final GoogleSignInAccount gUser = await _googleAuth.authenticate();
-      final gAuth =  gUser.authentication;
-      if (gAuth.idToken == null) return false;
-      final credential = GoogleAuthProvider.credential(
-        idToken: gAuth.idToken,
-      );
+  Future<bool> loginWithGoogle() async { 
+      await _ensureGoogleSignInInitialized();
+      final account = await _googleAuth.authenticate();
+      final gAuth = account.authentication;
+     
+      final credential = GoogleAuthProvider.credential(idToken: gAuth.idToken);
       final userCredential = await _firebaseAuth.signInWithCredential(
         credential,
       );
       return userCredential.user != null;
-    } catch (e) {
-      return false;
-    }
-
-    // final gUser = await GoogleSignIn().signIn();
-    // final gAuth = await gUser?.authentication;
-    // final credential = GoogleAuthProvider.credential(
-    //   accessToken: gAuth?.accessToken,
-    //   idToken: gAuth?.idToken, );
-    // final userCredential = await _firebaseAuth.signInWithCredential(credential);
-    // if (userCredential.user != null) {
-    //   return true;
-    // } else {
-    //   return false;
-    // }
+    
   }
 }

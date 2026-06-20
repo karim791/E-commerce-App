@@ -25,7 +25,7 @@ class PaymentCardItem extends StatelessWidget {
         child: ListTile(
           leading: CachedNetworkImage(
             imageUrl:
-                'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/1200px-MasterCard_Logo.svg.png',
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/MasterCard_early_1990s_logo.svg/1280px-MasterCard_early_1990s_logo.svg.png',
             width: 50,
             height: 50,
             fit: BoxFit.contain,

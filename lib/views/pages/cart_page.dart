@@ -54,7 +54,7 @@ class CartPage extends StatelessWidget {
                                         MediaQuery.of(context).size.height *
                                         0.02,
                                   ),
-                                  totalPriceWidget(
+                                  _totalPriceWidget(
                                     context,
                                     'Subtotal',
                                     subtotalState.subtotal,
@@ -64,7 +64,7 @@ class CartPage extends StatelessWidget {
                                         MediaQuery.of(context).size.height *
                                         0.01,
                                   ),
-                                  totalPriceWidget(context, 'Shipping', 10.0),
+                                  _totalPriceWidget(context, 'Shipping', 10.0),
                                   SizedBox(
                                     height:
                                         MediaQuery.of(context).size.height *
@@ -83,7 +83,7 @@ class CartPage extends StatelessWidget {
                                         MediaQuery.of(context).size.height *
                                         0.01,
                                   ),
-                                  totalPriceWidget(
+                                  _totalPriceWidget(
                                     context,
                                     'Total Price',
                                     subtotalState.subtotal + 10,
@@ -103,7 +103,7 @@ class CartPage extends StatelessWidget {
                                   height:
                                       MediaQuery.of(context).size.height * 0.02,
                                 ),
-                                totalPriceWidget(
+                                _totalPriceWidget(
                                   context,
                                   'Subtotal',
                                   state.subtotal,
@@ -112,7 +112,7 @@ class CartPage extends StatelessWidget {
                                   height:
                                       MediaQuery.of(context).size.height * 0.01,
                                 ),
-                                totalPriceWidget(context, 'Shipping', 10.0),
+                                _totalPriceWidget(context, 'Shipping', 10.0),
                                 SizedBox(
                                   height:
                                       MediaQuery.of(context).size.height * 0.01,
@@ -128,7 +128,7 @@ class CartPage extends StatelessWidget {
                                   height:
                                       MediaQuery.of(context).size.height * 0.01,
                                 ),
-                                totalPriceWidget(
+                                _totalPriceWidget(
                                   context,
                                   'Total Price',
                                   state.subtotal + 10,
@@ -180,7 +180,7 @@ class CartPage extends StatelessWidget {
     );
   }
 
-  Widget totalPriceWidget(
+  Widget _totalPriceWidget(
     BuildContext context,
     String totalPrice,
     double price,

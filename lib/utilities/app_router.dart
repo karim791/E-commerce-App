@@ -20,7 +20,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
-
       case AppRoutes.homePage:
         return MaterialPageRoute(builder: (_) => BottomNavBar());
 
@@ -38,7 +37,7 @@ class AppRouter {
 
       case AppRoutes.cartPage:
         return MaterialPageRoute(builder: (_) => CartPage());
-        
+
       case AppRoutes.loginPage:
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
@@ -69,11 +68,8 @@ class AppRouter {
 
       case AppRoutes.paymentPage:
         return MaterialPageRoute(
-          builder: (_) => BlocProvider(
-            create: (context) {
-              final cubit = PaymentMethodCubit();
-              return cubit;
-            },
+          builder: (_) => BlocProvider.value(
+            value: settings.arguments as PaymentMethodCubit,
             child: AddNewCardPage(),
           ),
         );
@@ -83,17 +79,23 @@ class AppRouter {
 
       case AppRoutes.checkoutPage:
         return MaterialPageRoute(
-          builder: (_) => BlocProvider(
-            create: (context) {
-              final cubit = CheckoutCubit();
-              cubit.getCheckout();
-
-              return cubit;
-            },
+          builder: (_) => MultiBlocProvider(
+            providers: [
+        BlocProvider(
+          create: (context) {
+            final cubit = CheckoutCubit();
+            cubit.getCheckout();
+            return cubit;
+          },
+        ),
+        BlocProvider(
+          create: (context) => PaymentMethodCubit(),
+        ),
+      ],
             child: CheckoutPage(),
           ),
         );
-        
+
       case AppRoutes.favoritePage:
         return MaterialPageRoute(builder: (_) => FavoritePage());
 

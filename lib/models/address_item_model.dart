@@ -1,3 +1,4 @@
+
 class AddressItemModel {
   final String id;
   final String city;
@@ -5,7 +6,7 @@ class AddressItemModel {
   final String image;
   final bool isChosen;
 
-  AddressItemModel({
+  const AddressItemModel({
     required this.id,
     required this.city,
     required this.country,
@@ -28,10 +29,26 @@ class AddressItemModel {
       isChosen: isChosen ?? this.isChosen,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'id': id,
+      'city': city,
+      'country': country,
+      'image': image,
+      'isChosen': isChosen,
+    };
+  }
+
+  factory AddressItemModel.fromMap(Map<String, dynamic> map) {
+    return AddressItemModel(
+      id: map['id'] as String,
+      city: map['city'] as String,
+      country: map['country'] as String,
+      image: map['image'] as String,
+      isChosen: map['isChosen'] as bool,
+    );
+  }
+
 }
 
-List<AddressItemModel> dummyLocations = [
-  AddressItemModel(id: '1', city: 'Cairo', country: 'Egypt'),
-  AddressItemModel(id: '2', city: 'Giza', country: 'Egypt'),
-  AddressItemModel(id: '3', city: 'Alexandria', country: 'Egypt'),
-];

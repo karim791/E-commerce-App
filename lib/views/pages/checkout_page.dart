@@ -16,34 +16,28 @@ class CheckoutPage extends StatelessWidget {
   const CheckoutPage({super.key});
 
   Widget _buildPaymentCard(BuildContext context, PaymentCardModel? chosenCard) {
+    final checkoutCubit = BlocProvider.of<CheckoutCubit>(context);
     if (chosenCard != null) {
       return PaymentCardItem(
         chosenCard: chosenCard,
-        onItemTap: () async {
-          final checkoutCubit = context.read<CheckoutCubit>();
-          await showModalBottomSheet(
+        onItemTap: () {
+          showModalBottomSheet(
             isScrollControlled: true,
             context: context,
             builder: (_) {
               return SizedBox(
                 height: MediaQuery.of(context).size.height * 0.6,
-                child: MultiBlocProvider(
-                  providers: [
-                    BlocProvider<PaymentMethodCubit>(
-                      create: (context) {
-                        final cubit = PaymentMethodCubit();
-                        cubit.fetchPaymentMethod();
-                        return cubit;
-                      },
-                    ),
-                    BlocProvider.value(value: checkoutCubit),
-                  ],
+                child: BlocProvider(
+                  create: (context) {
+                    final cubit = PaymentMethodCubit();
+                    cubit.fetchPaymentMethod();
+                    return cubit;
+                  },
                   child: ModalBottomSheetMethod(),
                 ),
               );
             },
-          );
-          checkoutCubit.getCheckout();
+          ).then((value) async => await checkoutCubit.getCheckout());
         },
       );
     } else {
@@ -62,6 +56,31 @@ class CheckoutPage extends StatelessWidget {
     }
   }
 
+  //  Widget _totalPriceWidget(
+  //   BuildContext context,
+  //   String totalPrice,
+  //   double price,
+  // ) {
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //     children: [
+  //       Text(
+  //         totalPrice,
+  //         style: Theme.of(context).textTheme.titleLarge!.copyWith(
+  //           fontWeight: FontWeight.w500,
+  //           color: Colors.grey,
+  //         ),
+  //       ),
+  //       Text(
+  //         '\$$price',
+  //         style: Theme.of(
+  //           context,
+  //         ).textTheme.bodyLarge!.copyWith(color: Colors.black),
+  //       ),
+  //     ],
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -77,7 +96,9 @@ class CheckoutPage extends StatelessWidget {
             current is CheckoutLoading,
         builder: (context, state) {
           if (state is CheckoutLoading) {
-            return Center(child: CircularProgressIndicator.adaptive());
+            return Center(
+              child: CircularProgressIndicator.adaptive(strokeAlign: 2),
+            );
           } else if (state is CheckoutLoaded) {
             return SafeArea(
               child: SingleChildScrollView(
@@ -90,7 +111,7 @@ class CheckoutPage extends StatelessWidget {
                         onTap: () {
                           Navigator.of(context)
                               .pushNamed(AppRoutes.addressPage)
-                              .then((value) => cubit.getCheckout());
+                              .then((value) async => await cubit.getCheckout());
                         },
                       ),
                       _buildAddressWidget(context, state.location),
@@ -153,11 +174,28 @@ class CheckoutPage extends StatelessWidget {
                                             ],
                                           ),
                                         ),
+                                        Text.rich(
+                                          TextSpan(
+                                            text: 'Amount: ',
+                                            style: textTheme.bodyLarge!
+                                                .copyWith(color: Colors.grey),
+                                            children: [
+                                              TextSpan(
+                                                text: cartItem.quantity
+                                                    .toString(),
+                                                style: textTheme.bodyMedium!
+                                                    .copyWith(
+                                                      color: Colors.black,
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
                                   Text(
-                                    '\$${cartItem.product.price}',
+                                    '\$${cartItem.product.price * cartItem.quantity}',
                                     style: textTheme.titleLarge!.copyWith(
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -209,7 +247,7 @@ class CheckoutPage extends StatelessWidget {
                             backgroundColor: Theme.of(context).primaryColor,
                           ),
                           child: Text(
-                            'Checkout',
+                            'Proceed To Buy',
                             style: Theme.of(context).textTheme.bodyLarge!
                                 .copyWith(
                                   color: Colors.white,
@@ -224,7 +262,7 @@ class CheckoutPage extends StatelessWidget {
               ),
             );
           } else if (state is CheckoutError) {
-            return Center(child: Text('something went wrong'));
+            return Center(child: Text(state.message));
           }
           return SingleChildScrollView(
             child: Column(

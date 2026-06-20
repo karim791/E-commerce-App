@@ -1,4 +1,5 @@
 import 'package:e_commerce_app/models/payment_card_model.dart';
+import 'package:e_commerce_app/services/checkout_services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'payment_method_state.dart';
@@ -6,67 +7,79 @@ part 'payment_method_state.dart';
 class PaymentMethodCubit extends Cubit<PaymentMethodState> {
   PaymentMethodCubit() : super(PaymentMethodInitial());
 
+  final checkoutServices = CheckoutServicesImpl();
+
   String? selectedId;
 
-  void getCard(
+  Future<void> getCard(
     String cardNumber,
     String holderName,
     String expiryDate,
     String cvvNumber,
-  ) {
+  ) async{
     emit(PaymentMethodLoading());
-    final cardModel = PaymentCardModel(
+    try{
+      final cardModel = PaymentCardModel(
       id: DateTime.now().toIso8601String(),
       cardNumber: cardNumber,
       holderName: holderName,
       expiryDate: expiryDate,
       cvvNumber: cvvNumber,
     );
-
-    Future.delayed(Duration(seconds: 1), () {
-      paymentCards.add(cardModel);
-      emit(PaymentMethodSuccess());
-    });
+    await checkoutServices.setPaymentCard(cardModel);
+    emit(PaymentMethodSuccess()); 
+    }catch(e){
+      emit(PaymentMethodFailure(e.toString()));
+    }
+   
   }
 
-  void fetchPaymentMethod() {
+
+  Future<void> fetchPaymentMethod() async {
     emit(FetchingPaymentMethod());
-    Future.delayed(Duration(seconds: 1), () {
+    try{
+      final paymentCards = await checkoutServices.fetchPaymentCards();
+      emit(FetchedPaymentMethod(paymentCards: paymentCards));
       final choosenCard = paymentCards.firstWhere(
         (paymentCard) => paymentCard.isChoosen == true,
         orElse: () => paymentCards.first,
       );
-      emit(FetchedPaymentMethod(paymentCards: paymentCards));
+      selectedId = choosenCard.id;
       emit(ChosenCardMethod(choosenCard));
-    });
-  }
 
-  void chosenCardMethod(String id) {
+    }catch(e){
+      emit(PaymentMethodFailure(e.toString()));
+    }
+  
+  }
+  
+
+    Future<void> changePaymentMethod(String id) async {
     selectedId = id;
-    emit(PaymentMethodCardSelected(id));
+    try {
+      final tempChosenPaymentMethod =
+          await checkoutServices.chosenPaymentCard(
+        selectedId!,
+      );
+      emit(ChosenCardMethod(tempChosenPaymentMethod));
+    } catch (e) {
+      emit(PaymentMethodFailure(e.toString()));
+    }
   }
 
-  void confirmCard() {
-    final int previousIndex = paymentCards.indexWhere(
-      (paymentCard) => paymentCard.isChoosen == true,
-    );
+  Future<void> confirmCard() async {
+    emit(ConfirmingCardMethod());
+    try{
+     final previousChosenCard = await checkoutServices.fetchPaymentCards(true);
+      final updatedPreviousChosenCard = previousChosenCard.first.copyWith(isChoosen: false);
+      final currentChosenCard = await checkoutServices.chosenPaymentCard(selectedId!);
+      final updatedCurrentChosenCard = currentChosenCard.copyWith(isChoosen: true);
+      await checkoutServices.setPaymentCard(updatedPreviousChosenCard);
+      await checkoutServices.setPaymentCard(updatedCurrentChosenCard);
+      emit(ConfirmCardMethod(updatedCurrentChosenCard));
 
-    if (previousIndex != -1) {
-      paymentCards[previousIndex] = paymentCards[previousIndex].copyWith(
-        isChoosen: false,
-      );
+    }catch(e){
+      emit(ConfirmingCardMethodError(e.toString()));
     }
-
-    final int chosenIndex = paymentCards.indexWhere(
-      (paymentCard) => paymentCard.id==selectedId,
-    );
-
-    if (chosenIndex != -1) {
-      paymentCards[chosenIndex] = paymentCards[chosenIndex].copyWith(
-        isChoosen: true,
-      );
-    }
-
-    emit(ConfirmCardMethod(paymentCards[chosenIndex]));
   }
 }
